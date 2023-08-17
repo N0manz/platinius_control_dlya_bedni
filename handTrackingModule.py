@@ -19,6 +19,7 @@ class handDetector():
             for handLms in self.results.multi_hand_landmarks:
                 if draw:
                     self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
+            print(self.results.multi_hand_landmarks)
         return img
     
     def find_position(self, img, hand_num):
