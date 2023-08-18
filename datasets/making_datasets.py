@@ -10,9 +10,8 @@ import math
 import volumeСhangeModule as vcm
 import pyautogui
 import slidingModule as sm
-import tensorflow as tf
-from tensorflow import keras
-
+import pickle
+import os
 
 def set_volume(volume):
     devices = AudioUtilities.GetSpeakers()
@@ -27,8 +26,13 @@ previous_wrist_y = 0
 
 
 detector = htm.handDetector()
+dataset = []
+execution_time = 30
+start_time = time.time()
+save_directory = r"D:\platinus_control_dlya_bedni\datasets\volume_change_dataset\dataset_for_volume_change"
 
-while True:
+
+while (time.time() - start_time) < execution_time:
     sucsess, img = cap.read()
 
     c_time = time.time()
@@ -41,12 +45,32 @@ while True:
         #for volume change
 
 
+        wrist_x, wrist_y = landmarks_List[0][1], landmarks_List[0][2]
         tumb_x, tumb_y = landmarks_List[4][1], landmarks_List[4][2]
         point_x, point_y = landmarks_List[8][1], landmarks_List[8][2]
-        volume_change = vcm.volumeChange(tumb_x, tumb_y, point_x, point_y)
-        volume_change.change_volume(img,tumb_x, tumb_y, point_x, point_y)
+
+        cv2.circle(img, (tumb_x, tumb_y), 20, (255, 0, 255))
+        cv2.circle(img, (point_x, point_y), 20, (255, 0, 255))
+        cv2.line(img, (tumb_x, tumb_y), (point_x, point_y), (255, 0, 255), 3)
+        len_of_line = math.hypot(tumb_x - point_x, tumb_y - point_y)
 
 
+        should_change_volume = len_of_line <= 40
+        data_point = {
+            'tumb_x': tumb_x,
+            'tumb_y': tumb_y,
+            'point_x': point_x,
+            'point_y': point_y,
+            'writst_x': wrist_x,
+            'wrist_y': wrist_y,
+            'should_change_volume': should_change_volume
+        }
+        print(should_change_volume)
+        dataset.append(data_point)
+
+
+        if (time.time() - start_time) >= execution_time:
+            break
         #for sliding
 
 
@@ -62,4 +86,14 @@ while True:
     cv2.putText(img, str(int(fps)), (30, 60), cv2.FONT_HERSHEY_PLAIN, 3, (255,255,255), 3)
     cv2.imshow("Image", img)
     cv2.waitKey(1)
+
+if not os.path.exists(save_directory):
+    os.makedirs(save_directory)
+
+dataset_filename = os.path.join(save_directory, "dataset_for_volume_change.pickle")
+
+with open(dataset_filename, 'wb') as f:
+    pickle.dump(dataset, f)
+
+print(f"Датасет сохранен в файл {dataset_filename}")
     
