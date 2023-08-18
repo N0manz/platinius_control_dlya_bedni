@@ -15,7 +15,7 @@ import os
 import tensorflow as tf
 from tensorflow import keras
 
-model = keras.models.load_model(r"D:\platinus_control_dlya_bedni\model\volume_change.h5")
+model = keras.models.load_model(r"D:\platinus_control_dlya_bedni\model\model_for_gestures.h5")
 
 def set_volume(volume):
     devices = AudioUtilities.GetSpeakers()
@@ -56,13 +56,10 @@ while True:
         cv2.line(img, (tumb_x, tumb_y), (point_x, point_y), (255, 0, 255), 3)
         len_of_line = math.hypot(tumb_x - point_x, tumb_y - point_y)
 
-        should_change_volume = len_of_line <= 40
         test_data = np.array([[tumb_x, tumb_y, point_x, point_y, wrist_x, wrist_y]])
         prediction = model.predict(test_data)    
-        print(should_change_volume, prediction)
-
-        if prediction > 0.5:
-             cv2.putText(img, f'current mode is Volume Change {int(prediction * 100)}', (30, 90), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,0), 3)
+        predicted_class = np.argmax(prediction, axis=1)
+        cv2.putText(img, f'current mode is {predicted_class}', (30, 90), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,0), 3)
 
         #for sliding
 
@@ -72,7 +69,7 @@ while True:
         sliding.slide(img, current_wrist_x, current_wrist_y, previous_wrist_x, previous_wrist_y)
         previous_wrist_x, previous_wrist_y = current_wrist_x, current_wrist_y'''
 
-
+        previous_wrist_x, previous_wrist_y = wrist_x, wrist_y
         #for wraping
 
 

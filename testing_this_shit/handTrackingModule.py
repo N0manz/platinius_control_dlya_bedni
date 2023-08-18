@@ -7,7 +7,7 @@ class handDetector():
         self.max_hands = max_hands
 
         self.mpHands = mp.solutions.hands
-        self.hands = self.mpHands.Hands(self.mode, self.max_hands)
+        self.hands = self.mpHands.Hands(self.mode, self.max_hands, min_detection_confidence=0.5)
 
         self.mpDraw = mp.solutions.drawing_utils
 
