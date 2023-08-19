@@ -13,6 +13,7 @@ import slidingModule as sm
 import pickle
 import os
 
+
 def set_volume(volume):
     devices = AudioUtilities.GetSpeakers()
     interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -48,20 +49,35 @@ while (time.time() - start_time) < execution_time:
         wrist_x, wrist_y = landmarks_List[0][1], landmarks_List[0][2]
         tumb_x, tumb_y = landmarks_List[4][1], landmarks_List[4][2]
         point_x, point_y = landmarks_List[8][1], landmarks_List[8][2]
+        middle_x, middle_y = landmarks_List[12][1], landmarks_List[12][2]
 
         cv2.circle(img, (tumb_x, tumb_y), 20, (255, 0, 255))
         cv2.circle(img, (point_x, point_y), 20, (255, 0, 255))
         cv2.line(img, (tumb_x, tumb_y), (point_x, point_y), (255, 0, 255), 3)
         len_of_line = math.hypot(tumb_x - point_x, tumb_y - point_y)
 
+        cv2.circle(img, (wrist_x, wrist_y), 20, (255, 0, 255), thickness=-1)
+        between_midle_and_pointer_x, between_midle_and_pointer_y = abs(point_x + middle_x) // 2, abs(point_y + middle_y) // 2
+        
+        cv2.circle(img, (between_midle_and_pointer_x, between_midle_and_pointer_y), 20, (255, 0, 255), thickness=-1)
+        cv2.line(img, (wrist_x, wrist_y), (between_midle_and_pointer_x, between_midle_and_pointer_y), (0, 0, 255), 3)
+
+
+        dx = between_midle_and_pointer_x - wrist_x
+        dy = between_midle_and_pointer_y - wrist_y
+        angle_radians = math.atan2(dy, dx)
+        angle_degrees = math.degrees(angle_radians) * -1
 
         should_change_volume = len_of_line <= 40
-        should_slide = math.hypot(wrist_x - previous_wrist_x, wrist_y - previous_wrist_y) >= 40
+        should_slide_right = angle_degrees >= 100 
+        should_slide_left = angle_degrees <= 30
 
         if should_change_volume:
             mode = 1
-        elif should_slide:
+        elif should_slide_left:
             mode = 2
+        elif should_slide_right:
+            mode = 3
         else:
             mode = 0
 
@@ -72,13 +88,14 @@ while (time.time() - start_time) < execution_time:
             'point_y': point_y,
             'writst_x': wrist_x,
             'wrist_y': wrist_y,
+            'middle_x': middle_x,
+            'middle_y': middle_y,
             'mode': mode
         }
-        print(should_change_volume, should_slide, mode)
+
+        print(should_change_volume, should_slide_left, should_slide_right, mode)
         dataset.append(data_point)
 
-        previous_wrist_x = wrist_x
-        previous_wrist_y = wrist_y
         if (time.time() - start_time) >= execution_time:
             break
         #for sliding

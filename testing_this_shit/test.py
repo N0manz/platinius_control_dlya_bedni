@@ -14,6 +14,13 @@ import pickle
 import os
 import tensorflow as tf
 from tensorflow import keras
+import pyautogui
+
+
+cv2.namedWindow('Window', cv2.WINDOW_NORMAL)
+new_window_width = 700
+new_window_height = 700
+cv2.resizeWindow('Window', new_window_width, new_window_height)
 
 model = keras.models.load_model(r"D:\platinus_control_dlya_bedni\model\model_for_gestures.h5")
 
@@ -50,16 +57,28 @@ while True:
         wrist_x, wrist_y = landmarks_List[0][1], landmarks_List[0][2]
         tumb_x, tumb_y = landmarks_List[4][1], landmarks_List[4][2]
         point_x, point_y = landmarks_List[8][1], landmarks_List[8][2]
+        middle_x, middle_y = landmarks_List[12][1], landmarks_List[12][2]
 
         cv2.circle(img, (tumb_x, tumb_y), 20, (255, 0, 255))
         cv2.circle(img, (point_x, point_y), 20, (255, 0, 255))
         cv2.line(img, (tumb_x, tumb_y), (point_x, point_y), (255, 0, 255), 3)
+
         len_of_line = math.hypot(tumb_x - point_x, tumb_y - point_y)
 
-        test_data = np.array([[tumb_x, tumb_y, point_x, point_y, wrist_x, wrist_y]])
+        test_data = np.array([[tumb_x, tumb_y, point_x, point_y, wrist_x, wrist_y, middle_x, middle_y]])
         prediction = model.predict(test_data)    
         predicted_class = np.argmax(prediction, axis=1)
-        cv2.putText(img, f'current mode is {predicted_class}', (30, 90), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,0), 3)
+        if predicted_class == 1:
+            mode = 'volume change'
+        elif predicted_class == 2:
+            mode = 'sliding_left'
+            pyautogui.hotkey('alt', 'tab')
+        elif predicted_class == 3:
+            mode = 'sliding_right'
+            pyautogui.hotkey('alt', 'shift', 'tab')
+        else:
+            mode = 'None'
+        cv2.putText(img, mode, (30, 90), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,0), 3)
 
         #for sliding
 
@@ -74,7 +93,7 @@ while True:
 
 
     cv2.putText(img, str(int(fps)), (30, 60), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,0), 3)
-    cv2.imshow("Image", img)
+    cv2.imshow("Window", img)
     cv2.waitKey(1)
 
     
