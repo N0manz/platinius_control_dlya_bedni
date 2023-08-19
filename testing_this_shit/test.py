@@ -1,5 +1,4 @@
 import cv2
-import mediapipe as mp
 import time
 import numpy as np
 import handTrackingModule as htm
@@ -7,12 +6,7 @@ from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import math
-import volumeСhangeModule as vcm
 import pyautogui
-import slidingModule as sm
-import pickle
-import os
-import tensorflow as tf
 from tensorflow import keras
 import pyautogui
 
