@@ -40,23 +40,21 @@ while True:
 
         if predicted_class == 1:
             mode = 'volume change'
-            volume_change = vcm.volumeChange(tumb_x, tumb_y, point_x, point_y, previous_between_tumb_and_point_x, previous_between_tumb_and_point_y)
-            volume_change.change_volume(img,tumb_x, tumb_y, point_x, point_y, previous_between_tumb_and_point_x, previous_between_tumb_and_point_y)
+            volume_change = vcm.volumeChange(tumb_x, tumb_y, point_x, point_y)
+            volume_change.change_volume(img,tumb_x, tumb_y, point_x, point_y)
         elif predicted_class == 2:
             mode = 'sliding_left'
             pyautogui.hotkey('alt', 'tab')
-            time.sleep(3)
+            time.sleep(1)
         elif predicted_class == 3:
             mode = 'sliding_right'
             pyautogui.hotkey('alt', 'shift', 'tab')
-            time.sleep(3)
+            time.sleep(1)
         else:
             mode = 'None'
 
         cv2.putText(img, mode, (30, 90), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,0), 3)
-        previous_between_tumb_and_point_x, previous_between_tumb_and_point_y = (tumb_x + point_x) // 2, (tumb_y + point_y) // 2
         
-        print(previous_between_tumb_and_point_x, previous_between_tumb_and_point_y)
 
     cv2.putText(img, str(int(fps)), (30, 60), cv2.FONT_HERSHEY_PLAIN, 3, (255,255,255), 3)
     cv2.imshow("Image", img)
